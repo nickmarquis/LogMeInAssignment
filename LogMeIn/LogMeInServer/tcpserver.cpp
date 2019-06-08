@@ -1,3 +1,7 @@
+//:>--------------------------------------------------------------------------------------+
+//:> Nick Marquis                                                                   06/2019
+//:>+--------------------------------------------------------------------------------------
+
 #include "tcpserver.h"
 #include <QDebug>
 #include <QUrl>
@@ -9,13 +13,20 @@
 #include <QDataStream>
 #include <cassert>
 
+/// <summary>
+/// Constructor
+/// </summary>
 TCPServer::TCPServer(QObject *parent) : QObject(parent),
     m_server(new QTcpServer()) {}
 
+/// <summary>
+/// Load SIP registrations from a file and store it in a map with the AOR as the key.
+/// </summary>
 bool TCPServer::LoadSipRegistrations()
 {
     qDebug() << "Reading and parsing SIPs file...";
 
+    // file is in the qrc
     QFile sipFile(":/regs.txt");
     if (!sipFile.open(QIODevice::ReadOnly | QIODevice::Text))
     {
@@ -41,12 +52,20 @@ bool TCPServer::LoadSipRegistrations()
     return true;
 }
 
+/// <summary>
+/// Start the server to listen on any IPV4 and IPV6 address on port 8888
+/// </summary>
 bool TCPServer::Start() const
 {
+    qInfo("Starting TCP server...");
     connect(m_server, &QTcpServer::newConnection, this, &TCPServer::OnNewConnection);
     return m_server->listen(QHostAddress::Any, 8888);
 }
 
+/// <summary>
+/// Event when a new connection arrive. It can handle multiple connections.
+/// Store the socket and a buffer for it in a HashMap.
+/// </summary>
 void TCPServer::OnNewConnection()
 {
     while (m_server->hasPendingConnections())
@@ -66,6 +85,9 @@ void TCPServer::OnNewConnection()
     }
 }
 
+/// <summary>
+/// Event to handle the disconnnection of the socket.
+/// </summary>
 void TCPServer::OnSocketStateChanged(QAbstractSocket::SocketState socketState)
 {
     if (socketState == QAbstractSocket::UnconnectedState)
@@ -73,6 +95,7 @@ void TCPServer::OnSocketStateChanged(QAbstractSocket::SocketState socketState)
         auto sender = static_cast<QTcpSocket*>(QObject::sender());
         qInfo() << "Client " <<  sender->peerAddress().toString() << "has just been disconnected";
 
+        // delete everything (socket, sizePointer and bufferPointer)
         auto buffer = m_dataBuffers.value(sender);
         auto size = m_bufferSizes.value(sender);
         sender->deleteLater();
@@ -81,42 +104,57 @@ void TCPServer::OnSocketStateChanged(QAbstractSocket::SocketState socketState)
     }
 }
 
+/// <summary>
+/// Event called when new data steam arrive by a socket.
+/// </summary>
 void TCPServer::OnReadyRead()
 {
     auto sender = static_cast<QTcpSocket*>(QObject::sender());
     auto buffer = m_dataBuffers.value(sender);
     auto s = m_bufferSizes.value(sender);
     auto size = *s;
+
+    // read until there is no more byte in the socket
     while (sender->bytesAvailable() > 0)
     {
         buffer->append(sender->readAll());
         while ((size == 0 && buffer->size() >= 4) || (size > 0 && buffer->size() >= size))
         {
+            // read the size and remove those data
             if (size == 0 && buffer->size() >= 4)
             {
                 size = ReadBufferSize(buffer->mid(0, 4));
                 *s = size;
                 buffer->remove(0, 4);
             }
+            // read the AOR
             if (size > 0 && buffer->size() >= size)
             {
                 auto data = buffer->mid(0, size);
                 buffer->remove(0, size);
                 size = 0;
                 *s = size;
-                QueryAndSendResult(sender, QString(data));
+                // emit a signal to query the database.
+                emit QueryAndSendResult(sender, QString(data));
             }
         }
     }
 }
 
-void TCPServer::QueryAndSendResult(QTcpSocket* socket, QString aor)
+/// <summary>
+/// Event to query the hashMap of SIP with the requested AOR.
+/// Answer to the socket with the response (SIP).
+/// </summary>
+void TCPServer::OnQueryAndSendResult(QTcpSocket* socket, QString aor)
 {
     auto sip = m_records.value(aor);
     socket->write(QByteArray::fromStdString(sip.toStdString()));
     socket->waitForBytesWritten();
 }
 
+/// <summary>
+/// Read the byte array and transform it as a number.
+/// </summary>
 int TCPServer::ReadBufferSize(QByteArray source)
 {
     int temp;

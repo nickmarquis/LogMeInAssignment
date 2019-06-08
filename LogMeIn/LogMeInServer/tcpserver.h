@@ -1,3 +1,6 @@
+//:>--------------------------------------------------------------------------------------+
+//:> Nick Marquis                                                                   06/2019
+//:>+--------------------------------------------------------------------------------------
 #ifndef TCPSERVER_H
 #define TCPSERVER_H
 
@@ -5,6 +8,10 @@
 #include <QTcpServer>
 #include <QMap>
 
+/// <summary>
+/// TCPServer running on port 8888.
+/// It reply with a SIP when a address of records is transmitted from a client.
+/// </summary>
 class TCPServer : public QObject
 {
     Q_OBJECT
@@ -19,11 +26,14 @@ private slots:
     void OnSocketStateChanged(QAbstractSocket::SocketState socketState);
     void OnReadyRead();
 
-private:
+signals:
     void QueryAndSendResult(QTcpSocket* socket, QString aor);
+
+private:
+    void OnQueryAndSendResult(QTcpSocket* socket, QString aor);
     int ReadBufferSize(QByteArray source);
 
-    QMap<QString, QString>          m_records;
+    QHash<QString, QString>         m_records;
     QTcpServer*                     m_server;
     QHash<QTcpSocket*, QByteArray*> m_dataBuffers;
     QHash<QTcpSocket*, qint32*>     m_bufferSizes;
