@@ -22,6 +22,7 @@ Reading and parsing SIPs file...
 Starting TCP server...
 Server started. Listening on port 8888
 New client connected:  "::ffff:127.0.0.1"
+Querying SIP with:  "0128841e7193fea0272e000100620001"
 Client  "::ffff:127.0.0.1" has just been disconnected
 ```
 
