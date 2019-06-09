@@ -16,42 +16,41 @@ int main(int argc, char *argv[])
 
     QCoreApplication::setApplicationName("LogMeInClient");
 
-    auto connected = false;
     auto tcpClient = new TCPClient();
-    // will need to get that from command line arg
-    if (tcpClient->ConnectToHost(QHostAddress("127.0.0.1")))
+
+    bool connected = false;
+    if (tcpClient->connectToHost())
         connected = true;
 
-    tcpClient->ReadData();
     while(connected)
     {
-        //if (tcpClient->isQuerying())
-        //{
-        //    // sleep 2s
-        //    QThread::sleep(2);
-        //    continue;
-        //}
-            
-        qInfo() << "Enter the address of record that you're looking for:";
+        // Give time for the server to reply
+        QThread::sleep(1);
+
+        qInfo() << "\nEnter the address of record that you're looking for:";
         QTextStream s(stdin);
         auto aor = s.readLine();
-        s.flush();
 
-        if(!tcpClient->Query(aor))
+        QCoreApplication::instance()->processEvents(QEventLoop::AllEvents);
+        if(!tcpClient->isConnected())
         {
-            qInfo() << "You have been disconnected. Would you like to reconnect and retry (Y/N): ";
+            qInfo() << "\nYou have been disconnected. Would you like to reconnect and retry (Y/N): ";
             auto retry = s.readLine();
-            if (!retry.compare("Y", Qt::CaseSensitivity::CaseInsensitive))
+            if (retry.compare("Y", Qt::CaseSensitivity::CaseInsensitive) != 0)
             {
                 qInfo() << "Quitting...";
-                break;
+                QThread::sleep(2);
+                return 0;
             }
-            if (!tcpClient->ConnectToHost(QHostAddress("127.0.0.1")) || !tcpClient->Query(aor))
+            else if (!tcpClient->connectToHost())
             {
-                qWarning() << "Enable to reconnect and send the query. Quitting...";
-                break;
-            }                          
+                qWarning() << "Enable to reconnect. Quitting...";
+                QThread::sleep(2);
+                return 0;
+            }
         }
+        if (!tcpClient->query(aor))
+            qWarning() << "Enable to query AOR:" << aor;
     }
 
     return a.exec();

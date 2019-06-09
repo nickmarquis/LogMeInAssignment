@@ -6,6 +6,7 @@
 
 #include <QObject>
 #include <QTcpServer>
+#include <QTimer>
 #include <QMap>
 
 /// <summary>
@@ -17,26 +18,28 @@ class TCPServer : public QObject
     Q_OBJECT
 public:
     explicit TCPServer(QObject *parent = nullptr);
-    ~TCPServer() = default;
-    bool LoadSipRegistrations();
-    bool Start() const;
+    ~TCPServer();
+    bool loadSipRegistrations();
+    bool start() const;
 
 private slots:
-    void OnNewConnection();
-    void OnSocketStateChanged(QAbstractSocket::SocketState socketState);
-    void OnReadyRead();
+    void onNewConnection();
+    void onSocketStateChanged(QAbstractSocket::SocketState socketState);
+    void onReadyRead();
+    void onCloseConnection();
+    void onQueryAndSendResult(QTcpSocket* socket, QString aor);
 
 signals:
-    void QueryAndSendResult(QTcpSocket* socket, QString aor);
+    void queryAndSendResult(QTcpSocket* socket, QString aor);
 
 private:
-    void OnQueryAndSendResult(QTcpSocket* socket, QString aor);
-    int ReadBufferSize(QByteArray source);
+    int readBufferSize(QByteArray source);
 
     QHash<QString, QString>         m_records;
     QTcpServer*                     m_server;
     QHash<QTcpSocket*, QByteArray*> m_dataBuffers;
     QHash<QTcpSocket*, qint32*>     m_bufferSizes;
+    QHash<QTimer*, QTcpSocket*>     m_socketTimers;
 };
 
 #endif // TCPSERVER_H

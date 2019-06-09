@@ -6,41 +6,45 @@
 #include <QTcpSocket>
 #include <QHostAddress>
 #include <QDataStream>
+#include <QThread>
+#include <QCoreApplication>
 
 /// <summary>
 /// Constructor
 /// </summary>
-TCPClient::TCPClient() : 
-m_socket(new QTcpSocket()), 
-m_isQuerying(false)
-{}
+TCPClient::TCPClient() :
+m_socket(new QTcpSocket())
+{
+    connect(m_socket, &QTcpSocket::disconnected, []()->void{ qDebug("Disconnected from host"); });
+}
 
 /// <summary>
 /// Connect the socket to the host on port 8888.
 /// return true if it's a success.
 /// </summary>
-bool TCPClient::ConnectToHost(QHostAddress host)
+bool TCPClient::connectToHost()
 {
+    auto host = QHostAddress("127.0.0.1");
     m_socket->connectToHost(host, 8888);
-    //connect(m_socket, &QTcpSocket::readyRead, this, &TCPClient::OnReadyRead);
-
     if (m_socket->waitForConnected())
+    {
+        readData();
         return true;
+    }
 
-    qWarning() << "Could not connect to host" << host.toString() << ": " << m_socket->error();
+    qWarning() << "Could not connect to host " << host.toString() << ": " << m_socket->error();
     return false;
 }
 
 /// <summary>
 /// Query a SIP on the TCP Server with an AOR.
 /// </summary>
-bool TCPClient::Query(QString addressOfRecord)
+bool TCPClient::query(QString addressOfRecord)
 {
+    QCoreApplication::processEvents();
     qInfo() << "Querying server with AOR: " << addressOfRecord;
-
     if (m_socket->state() == QAbstractSocket::ConnectedState)
     {
-        m_isQuerying = true;
         auto byteAOR = QByteArray::fromStdString(addressOfRecord.toStdString());
 
         // write the size of the payload before the aor itself
@@ -51,27 +55,25 @@ bool TCPClient::Query(QString addressOfRecord)
         m_socket->write(temp);
         m_socket->write(byteAOR);
         m_socket->waitForBytesWritten();
-
-        ReadData();
-
+        readData();
         return true;
     }
-
     return false;
 }
 
 /// <summary>
-/// Event to read the data reveive on the TCP socket.
+/// Read the data reveive on the TCP socket.
 /// </summary>
-void TCPClient::ReadData()
+void TCPClient::readData()
 {
     QByteArray dataBuffer;
     dataBuffer.clear();
-    m_socket->waitForReadyRead();
+
+    // timeout read after 2 sec
+    m_socket->waitForReadyRead(2000);
     while (m_socket->bytesAvailable() > 0)
     {
         dataBuffer.append(m_socket->readAll());
     }
-    qInfo() << "Server replied with: " << dataBuffer;
-    //m_isQuerying = false;
+    qInfo() << "\nServer replied with: " << dataBuffer;
 }

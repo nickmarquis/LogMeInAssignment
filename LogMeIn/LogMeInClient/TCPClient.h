@@ -15,16 +15,17 @@ class TCPClient : public QObject
     Q_OBJECT
 public:
     TCPClient();
-    ~TCPClient() = default;
+    ~TCPClient() { m_socket->deleteLater(); }
 
-    bool ConnectToHost(QHostAddress host);
-    bool Query(QString addressOfRecord);
-    bool isQuerying() const { return m_isQuerying; }
-    void ReadData();
+    bool isConnected() { return m_socket->waitForConnected(500); }
+    bool query(QString addressOfRecord);
+    void readData();
+
+public slots:
+    bool connectToHost();
 
 private:
     QTcpSocket*         m_socket;
-    bool                m_isQuerying;
 };
 
 #endif // TCPCLIENT_H

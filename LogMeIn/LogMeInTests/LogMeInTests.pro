@@ -6,13 +6,16 @@ CONFIG -= app_bundle
 
 TEMPLATE = app
 
-INCDIR = ../LogMeInServer
-INCLUDEPATH += $$INCDIR
+SERVER = ../LogMeInServer
+CLIENT = ../LogMeInClient
+INCLUDEPATH += $$SERVER $$CLIENT
 
-HEADERS += $$INCDIR/tcpServer.h \
-    logmeinservertests.h
-SOURCES +=  $$INCDIR/tcpServer.cpp \
-    logmeinservertests.cpp
+HEADERS += $$SERVER/TCPServer.h \
+    $$CLIENT/TCPClient.h \
+    LogMeInServerTests.h
+SOURCES +=  $$SERVER/TCPServer.cpp \
+    $$CLIENT/TCPClient.cpp \
+    LogMeInServerTests.cpp
 
 RESOURCES += \
-    $$INCDIR/Resources/resources.qrc
+    $$SERVER/Resources/resources.qrc

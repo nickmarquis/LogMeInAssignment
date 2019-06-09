@@ -17,11 +17,11 @@ int main(int argc, char *argv[])
 
     auto server = new TCPServer();
 
-    if (!server->LoadSipRegistrations())
+    if (!server->loadSipRegistrations())
         qWarning("Cannot load SIP registrations. The server won't start.");
     else
     {
-        if (!server->Start())
+        if (!server->start())
             qWarning("Cannot start server. Please close the program and retry.");
         else
             qInfo("Server started. Listening on port 8888");

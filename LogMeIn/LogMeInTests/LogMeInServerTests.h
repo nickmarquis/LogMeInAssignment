@@ -20,10 +20,19 @@ public:
     ~LogMeInServerTests() = default;
 
 private slots:
-    void initTestCase();
-    void cleanupTestCase();
-    void testCaseReadSIPFile();
 
+    //:>---------------------------------------------------------------------------------------
+    //:> Unit Tests
+    //:>---------------------------------------------------------------------------------------
+    void testCaseReadSIPFile();
+    void testCaseStartServer();
+
+    //:>---------------------------------------------------------------------------------------
+    //:> Integration Tests
+    //:>---------------------------------------------------------------------------------------
+    void testCaseServerConnect();
+    void testCaseServerDisconnect();
+    void testCaseServerReceiveAOR();
 };
 
 #endif // LOGMEINSERVERTESTS_H
