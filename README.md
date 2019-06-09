@@ -2,7 +2,7 @@
 This is an interview assignment for LogMeIn
 
 ## Description
-The TCP server read a SIP registrations file and store it in memory. Then the server listen to any address (IPV4 and IPV6) on the port 8888. The server can handle multiple socket connections. 
+The TCP server read a SIP registrations file and store it in memory. Then the server listen for a connection on any address (IPV4 and IPV6) on the port 8888. The server can handle multiple socket connections. 
 
 Then a client can connect and request a SIP registration by sending an address of records.
 
@@ -10,11 +10,11 @@ Then a client can connect and request a SIP registration by sending an address o
 
 The project is build on top of the Qt library. To build the project you will have to download the latest [Qt Open source](https://www.qt.io/download). After that, you can just use Qt Creator to build/run and test the project. Qt Creator use qmake to build the project.
 
-### Installing
+### Releases
 
-* Todo
+A [release](https://github.com/nickmarquis/LogMeInAssignment/releases) has been create if you want to test it without building it. It's compatible with Windows 64x.
 
-### Exemple of output
+### Exemple of outputs
 
 TCPServer
 ```txt
