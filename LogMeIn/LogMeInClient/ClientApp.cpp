@@ -17,16 +17,9 @@ m_tcpClient(new TCPClient())
     connect(this, &ClientApp::query, m_tcpClient, &TCPClient::query);
     connect(this, &ClientApp::connectToHost, m_tcpClient, &TCPClient::connectToHost);
     connect(thread, &QThread::started, m_tcpClient, &TCPClient::connectToHost);
+    connect(thread, &QThread::destroyed, m_tcpClient, &TCPClient::deleteLater);
 
     thread->start();
-}
-
-/// <summary>
-/// Destructor
-/// </summary>
-ClientApp::~ClientApp()
-{
-    m_tcpClient->deleteLater();
 }
 
 /// <summary>

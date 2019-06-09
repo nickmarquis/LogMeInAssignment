@@ -17,12 +17,12 @@ class TCPServer : public QObject
 {
     Q_OBJECT
 public:
-    explicit TCPServer(QObject *parent = nullptr);
+    TCPServer(QObject *parent = nullptr);
     ~TCPServer();
     bool loadSipRegistrations();
     bool start() const;
 
-private slots:
+public slots:
     void onNewConnection();
     void onSocketStateChanged(QAbstractSocket::SocketState socketState);
     void onReadyRead();

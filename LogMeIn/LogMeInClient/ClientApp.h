@@ -16,7 +16,7 @@ class ClientApp : public QObject
     Q_OBJECT
 public:
     ClientApp(QObject *parent = nullptr);
-    ~ClientApp();
+    ~ClientApp() = default;
     void start();
 
 signals:

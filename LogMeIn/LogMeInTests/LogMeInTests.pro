@@ -12,9 +12,11 @@ INCLUDEPATH += $$SERVER $$CLIENT
 
 HEADERS += $$SERVER/TCPServer.h \
     $$CLIENT/TCPClient.h \
+    $$CLIENT/ClientApp.h \
     LogMeInServerTests.h
 SOURCES +=  $$SERVER/TCPServer.cpp \
     $$CLIENT/TCPClient.cpp \
+    $$CLIENT/ClientApp.h \
     LogMeInServerTests.cpp
 
 RESOURCES += \

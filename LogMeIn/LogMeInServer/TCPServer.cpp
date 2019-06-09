@@ -38,7 +38,7 @@ TCPServer::~TCPServer()
 /// </summary>
 bool TCPServer::loadSipRegistrations()
 {
-    qDebug() << "Reading and parsing SIPs file...";
+    qInfo() << "Reading and parsing SIPs file...";
 
     // file is in the qrc
     QFile sipFile(":/regs.txt");
@@ -174,6 +174,7 @@ void TCPServer::onReadyRead()
 /// </summary>
 void TCPServer::onQueryAndSendResult(QTcpSocket* socket, QString aor)
 {
+    qInfo() << "Querying SIP with: " << aor;
     auto sip = m_records.value(aor);
     socket->write(QByteArray::fromStdString(sip.toStdString()));
     socket->waitForBytesWritten();

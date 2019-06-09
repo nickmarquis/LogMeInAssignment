@@ -4,7 +4,7 @@
 
 #include "LogMeInServerTests.h"
 #include "../LogMeInServer/TCPServer.h"
-#include "../LogMeInClient/TCPClient.h"
+#include "../LogMeInClient/ClientApp.h"
 
 /// <summary>
 /// Test if when can correctly read a SIP file.
@@ -68,19 +68,40 @@ void LogMeInServerTests::testCaseServerReceiveAOR()
 {
     qRegisterMetaType<QTcpSocket*>();
 
+    QTest::ignoreMessage(QtInfoMsg, "Querying SIP with:  \"015802aa8439a1de3e000100620002\"");
     auto tcpServer = new TCPServer();
     tcpServer->start();
 
-//    auto tcpClient = new TCPClient();
-//    auto success = tcpClient->connectToHost();
-//    QCOMPARE(success, true);
+    auto tcpClient = new TCPClient();
+    auto success = tcpClient->connectToHost();
+    QCOMPARE(success, true);
 
-//    QSignalSpy spy(tcpServer, &TCPServer::queryAndSendResult);
-//    tcpClient->query("015802aa8439a1de3e000100620002");
+    // wait for onNewConnection to be called
+    QTest::qWait(1000);
+    tcpClient->query("015802aa8439a1de3e000100620002");
+    QTest::qWait(1000);
+}
 
-    //spy.wait(100);
-    //QTRY_COMPARE_WITH_TIMEOUT(spy.count(), 1, 2000);
-    //QCOMPARE(spy.count(), 1);
+/// <summary>
+/// Test if the server send the right SIP
+/// </summary>
+void LogMeInServerTests::testCaseClientReceiveSIP()
+{
+    qRegisterMetaType<QTcpSocket*>();
+
+    QTest::ignoreMessage(QtInfoMsg, QRegularExpression("sip:015802aa8439a1de3e000100620002@26.39.196.144:5060"));
+    auto tcpServer = new TCPServer();
+    tcpServer->loadSipRegistrations();
+    tcpServer->start();
+
+    auto tcpClient = new TCPClient();
+    auto success = tcpClient->connectToHost();
+    QCOMPARE(success, true);
+
+    // wait for onNewConnection to be called
+    QTest::qWait(1000);
+    tcpClient->query("015802aa8439a1de3e000100620002");
+    QTest::qWait(2000);
 }
 
 QTEST_MAIN(LogMeInServerTests)

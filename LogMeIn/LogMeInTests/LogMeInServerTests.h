@@ -33,6 +33,7 @@ private slots:
     void testCaseServerConnect();
     void testCaseServerDisconnect();
     void testCaseServerReceiveAOR();
+    void testCaseClientReceiveSIP();
 };
 
 #endif // LOGMEINSERVERTESTS_H
