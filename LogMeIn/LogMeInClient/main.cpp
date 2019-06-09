@@ -5,53 +5,22 @@
 #include <QtCore/QCoreApplication>
 #include <QHostAddress>
 #include <QThread>
-#include "TCPClient.h"
+#include "ClientApp.h"
 
 /// <summary>
 /// Main entry of the program obviously.
 /// </summary>
 int main(int argc, char *argv[])
 {
+    qRegisterMetaType<QAbstractSocket::SocketState>();
     QCoreApplication a(argc, argv);
 
     QCoreApplication::setApplicationName("LogMeInClient");
 
-    auto tcpClient = new TCPClient();
+    auto app = new ClientApp();
+    app->start();
 
-    bool connected = false;
-    if (tcpClient->connectToHost())
-        connected = true;
-
-    while(connected)
-    {
-        // Give time for the server to reply
-        QThread::sleep(1);
-
-        qInfo() << "\nEnter the address of record that you're looking for:";
-        QTextStream s(stdin);
-        auto aor = s.readLine();
-
-        QCoreApplication::instance()->processEvents(QEventLoop::AllEvents);
-        if(!tcpClient->isConnected())
-        {
-            qInfo() << "\nYou have been disconnected. Would you like to reconnect and retry (Y/N): ";
-            auto retry = s.readLine();
-            if (retry.compare("Y", Qt::CaseSensitivity::CaseInsensitive) != 0)
-            {
-                qInfo() << "Quitting...";
-                QThread::sleep(2);
-                return 0;
-            }
-            else if (!tcpClient->connectToHost())
-            {
-                qWarning() << "Enable to reconnect. Quitting...";
-                QThread::sleep(2);
-                return 0;
-            }
-        }
-        if (!tcpClient->query(aor))
-            qWarning() << "Enable to query AOR:" << aor;
-    }
+    qInfo() << "Quitting...";
 
     return a.exec();
 }

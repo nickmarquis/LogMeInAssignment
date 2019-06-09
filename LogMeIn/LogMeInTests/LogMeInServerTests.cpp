@@ -66,17 +66,17 @@ Q_DECLARE_METATYPE(QTcpSocket*)
 /// </summary>
 void LogMeInServerTests::testCaseServerReceiveAOR()
 {
+    qRegisterMetaType<QTcpSocket*>();
+
     auto tcpServer = new TCPServer();
     tcpServer->start();
 
-    auto tcpClient = new TCPClient();
-    auto success = tcpClient->connectToHost();
-    QCOMPARE(success, true);
+//    auto tcpClient = new TCPClient();
+//    auto success = tcpClient->connectToHost();
+//    QCOMPARE(success, true);
 
-    QSignalSpy spy(tcpServer, &TCPServer::queryAndSendResult);
-
-    qRegisterMetaType<QTcpSocket*>();
-    tcpClient->query("015802aa8439a1de3e000100620002");
+//    QSignalSpy spy(tcpServer, &TCPServer::queryAndSendResult);
+//    tcpClient->query("015802aa8439a1de3e000100620002");
 
     //spy.wait(100);
     //QTRY_COMPARE_WITH_TIMEOUT(spy.count(), 1, 2000);
